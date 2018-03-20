@@ -1,6 +1,10 @@
 BEGIN 		{ FS = ":"; RS = "\n";IGNORECASE = 1;i=1;k=1;l=1; }
 
-
+$1~/%inv/	{
+				split($2,segundo," ");
+				split($3,terceiro," ");
+				inversos[segundo[1]] = terceiro[1];	
+			}
 $1~/%THE/	{ 
 				if($1~/</){
 					split($1,uni,"<");
@@ -54,14 +58,25 @@ $1!~/%/ &&  $1!~/#/ {
 									if(instancia[i] != ""){
 										print("("triplos[t]",iof,"$1")");
 									}
+									for(inv in inversos){
+										if(relacoes[i]==inv){
+											print ("("triplos[t]","inversos[inv]","$1")");
+										}
+									}
 								}
 
 							}
-							else{
-								if($i!=""){
+							else if($i!=""){
 									print("("$1","relacoes[i]","$i")");
+									if(instancia[i] != ""){
+										print("("$i",iof,"$1")");
+									}
+									for(inv in inversos){
+										if(relacoes[i]==inv){
+											print ("("$i","inversos[inv]","$1")");
+										}
+									}
 								}
 							}
 						}
-}
 
