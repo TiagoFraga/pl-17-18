@@ -3,7 +3,7 @@ $1~/%dom/ 	{ dominios[$2]++;}
 $1~/%THE/	{
 				for(i=2; i<NF+1;i++){
 					
-					if($i~/ ./){
+					if($i~/ ./ || $i~/.* /){
 						split($i,tmp," ");
 						if(tmp[1]~/</){
 							split(tmp[1],aux,"<");

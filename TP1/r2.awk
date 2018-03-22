@@ -1,4 +1,4 @@
-BEGIN 		{ FS = ":"; RS = "\n";IGNORECASE = 1;i=1;k=1;l=1; }
+BEGIN 		{ FS = ":"; RS = "\n";IGNORECASE=1; }
 
 $1~/%inv/	{
 				split($2,segundo," ");
@@ -13,7 +13,7 @@ $1~/%THE/	{
 
 				for(i=2; i<NF+1;i++){
 					
-					if($i~/ ./){
+					if($i~/ ./ || $i~/.* /){
 						split($i,tmp," ");
 						if(tmp[1]~/</){
 							split(tmp[1],aux,"<");
@@ -56,7 +56,7 @@ $1!~/%/ &&  $1!~/#/ {
 								for(t in triplos){
 									print("("$1","relacoes[i]","triplos[t]")");
 									if(instancia[i] != ""){
-										print("("triplos[t]",iof,"$1")");
+										print("("triplos[t]",iof,"instancia[i]")");
 									}
 									for(inv in inversos){
 										if(relacoes[i]==inv){
@@ -69,7 +69,7 @@ $1!~/%/ &&  $1!~/#/ {
 							else if($i!=""){
 									print("("$1","relacoes[i]","$i")");
 									if(instancia[i] != ""){
-										print("("$i",iof,"$1")");
+										print("("$i",iof,"instancia[i]")");
 									}
 									for(inv in inversos){
 										if(relacoes[i]==inv){

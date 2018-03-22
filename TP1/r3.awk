@@ -10,8 +10,6 @@ $1~/%inv/	{
 					split(terceiro[1],terceiro," ");
 				}
 				inversos[segundo[1]] = terceiro[1];	
-				print(segundo[1]);
-				print(inversos[segundo[1]]);
 			}
 $1~/%THE/	{ 
 				if($1~/</){
@@ -21,7 +19,7 @@ $1~/%THE/	{
 
 				for(i=2; i<NF+1;i++){
 					
-					if($i~/ ./){
+					if($i~/ ./ || $i~/.* /){
 						split($i,tmp," ");
 						if(tmp[1]~/</){
 							split(tmp[1],aux,"<");
