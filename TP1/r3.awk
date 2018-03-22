@@ -2,8 +2,16 @@ BEGIN 		{ FS = ":"; RS = "\n";IGNORECASE=1; filename = "thesaurus.txt"; }
 
 $1~/%inv/	{
 				split($2,segundo," ");
+				while(segundo[1]~/ ./){
+					split(segundo[1],segundo," ");
+				}
 				split($3,terceiro," ");
+				while(terceiro[1]~/ ./){
+					split(terceiro[1],terceiro," ");
+				}
 				inversos[segundo[1]] = terceiro[1];	
+				print(segundo[1]);
+				print(inversos[segundo[1]]);
 			}
 $1~/%THE/	{ 
 				if($1~/</){
@@ -68,13 +76,12 @@ $1!~/%/ &&  $1!~/#/ && $1!=""{
 
 								for(i=2;i<NF+1;i++){
 									if($i!=""){
-										for(inv in inversos){
-											if(relacoes[i]==inv){
+											if(inversos[relacoes[i]]!=""){
 												if($i~/|/){
 													split($i,tripletes,"|");
-													for(t in triplos){
+													for(t in tripletes){
 														print(tripletes[t])>filename;
-														print(inversos[inv]": " $1)>filename;
+														print(inversos[relacoes[i]]": " $1)>filename;
 														if(instancia[i]!=""){
 															print("iof: "instancia[i])>filename;
 														}
@@ -82,8 +89,8 @@ $1!~/%/ &&  $1!~/#/ && $1!=""{
 													}
 												}
 												else{
-													print("PUTAS"$i)>filename;
-													print(inversos[inv]": " $1)>filename;
+													print($i)>filename;
+													print(inversos[relacoes[i]]": " $1)>filename;
 													if(instancia[i]!=""){
 														print("iof: "instancia[i])>filename;
 													}
@@ -92,7 +99,7 @@ $1!~/%/ &&  $1!~/#/ && $1!=""{
 										}
 									}
 								}
-							}
+							
 
 
 
