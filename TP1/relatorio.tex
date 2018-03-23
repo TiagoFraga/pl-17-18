@@ -1,0 +1,517 @@
+%
+% Layout retirado de http://www.di.uminho.pt/~prh/curplc09.html#notas
+%
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+\usepackage[latin1]{inputenc}
+\usepackage[portuguese]{babel}
+
+\usepackage{url}
+\usepackage{enumerate}
+\usepackage{fancyvrb}
+
+%\usepackage{alltt}
+%\usepackage{fancyvrb}
+\usepackage{listings}
+%LISTING - GENERAL
+\lstset{
+	basicstyle=\small,
+	numbers=left,
+	numberstyle=\tiny,
+	numbersep=5pt,
+	breaklines=true,
+    frame=tB,
+	mathescape=true,
+	escapeinside={(*@}{@*)}
+}
+%
+%\lstset{ %
+%	language=Java,							% choose the language of the code
+%	basicstyle=\ttfamily\footnotesize,		% the size of the fonts that are used for the code
+%	keywordstyle=\bfseries,					% set the keyword style
+%	%numbers=left,							% where to put the line-numbers
+%	numberstyle=\scriptsize,				% the size of the fonts that are used for the line-numbers
+%	stepnumber=2,							% the step between two line-numbers. If it's 1 each line
+%											% will be numbered
+%	numbersep=5pt,							% how far the line-numbers are from the code
+%	backgroundcolor=\color{white},			% choose the background color. You must add \usepackage{color}
+%	showspaces=false,						% show spaces adding particular underscores
+%	showstringspaces=false,					% underline spaces within strings
+%	showtabs=false,							% show tabs within strings adding particular underscores
+%	frame=none,								% adds a frame around the code
+%	%abovecaptionskip=-.8em,
+%	%belowcaptionskip=.7em,
+%	tabsize=2,								% sets default tabsize to 2 spaces
+%	captionpos=b,							% sets the caption-position to bottom
+%	breaklines=true,						% sets automatic line breaking
+%	breakatwhitespace=false,				% sets if automatic breaks should only happen at whitespace
+%	title=\lstname,							% show the filename of files included with \lstinputlisting;
+%											% also try caption instead of title
+%	escapeinside={\%*}{*)},					% if you want to add a comment within your code
+%	morekeywords={*,...}					% if you want to add more keywords to the set
+%}
+
+\usepackage{xspace}
+
+\setlength{\parindent}{3em}
+\setlength{\parskip}{1em}
+
+\setlength{\oddsidemargin}{-1cm}
+\setlength{\textwidth}{18cm}
+\setlength{\headsep}{-1cm}
+\setlength{\textheight}{23cm}
+
+\def\darius{\textsf{Darius}\xspace}
+\def\antlr{\texttt{AnTLR}\xspace}
+\def\pe{\emph{Publicação Eletrónica}\xspace}
+
+\def\titulo#1{\section{#1}}
+\def\super#1{{\em Supervisor: #1}\\ }
+\def\area#1{{\em \'{A}rea: #1}\\[0.2cm]}
+\def\resumo{\underline{Resumo}:\\ }
+
+
+
+\title{Processamento de Linguagens\\ \textbf{Trabalho Prático nº1 (Gawk)}\\ Relatório de Desenvolvimento}
+\author{Cesário Perneta\\ a73883 \and João Gomes\\ a74033 \and Tiago Fraga\\ a74092}
+\date{\today}
+
+\begin{document}
+
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{xleftmargin=.5in}
+
+\maketitle
+
+\begin{abstract}
+    Neste relatório será abordado a resolução e verificação do segundo trabalho prático da unidade curricular de Processamento de Linguagens. Será possível encontrar a forma como abordamos o problema proposto bem como uma explicação detalhada do código elaborado.
+    
+    Foi ainda trabalhado um ponto extra diferente dos que nos foram propostos no enunciado, visto utilizar os mesmos ficheiros e de modo a aprimorar os nossos conhecimentos ao nível desta nova Linguagem.
+\end{abstract}i
+
+\tableofcontents
+
+\chapter{ Processador de Thesaurus 1} \label{intro}
+    
+    O nosso grupo teve como enunciado o \textit{Processador de Thesaurus 1}, neste enuciado foi nos proposto que fizessemos uma analíse aos ficheiros \textit{.mdic} fornecidos, que continham as entradas de um \textit{Thesaurus}.
+    Depois de efectuada esta analíse a estes tipos de ficheiros, prosseguimos com o desonvolvimento de um programa em \textit{GAWK} que resolvessem os seguintes pontos:
+        
+        1 - Determinar a lista de domínios e relações usadas.
+        
+        2 - Mostrar os triplos expandidos correspondentes (um Triplo por linha).
+        
+        3 - Mostrar a informação contidas nos triplos, agrupadas pelo termo 1 (formato Thesaurus ISO).
+
+    Em seguida vamos mostrar como prosseguimos a realização destes pontos. 
+
+\titulo{ Determinar a lista de domínios e relações usados }
+
+    No primeiro ponto pede-se todos os domínios e as relações presentes nos ficheiros, isto é, temos de filtrar o texto de modo a obter todos os domínios que estão presentes nas \textit{tags \%dom} e todas as relações presentes nas \textit{tags \%THE}.
+
+\bigskip
+
+\begin{verbatim}
+BEGIN       { FS = ":"; RS = "\n";IGNORECASE = 1;}
+\end{verbatim}
+
+    No final da análise dos ficheiros concluimos que o \textit{Field Separator (FS)} mais adequado era os dois pontos evidenciados em cima. Definimos também o \textit{Record Separator (RS)} igual ao separador de linha. 
+
+    A instruçao \textit{IGNORECASE = 1} foi colocada para ignorar caso hajam os casos por exemplo : \textit{DOM; dom} assim o  \textit{GAWK} consegue assumir que se trata da mesma palavra.
+ 
+
+\begin{verbatim}
+$1~/%dom/   { dominios[$2]++;}
+\end{verbatim}
+    
+    Com a expressão regular apresentada em cima acedemos só as linhas do ficheiro que contêm a \textit{tag \%dom}. 
+    A acção evidenciada serve para guardar num array em que o índice é os dominios o numero de vezes que tal domínio ocorre. 
+
+\begin{verbatim}
+$1~/%THE/   {
+                for(i=2; i<NF+1;i++){
+                    
+                    if($i~/ ./){
+                        split($i,tmp," ");
+                        if(tmp[1]~/</){
+                            split(tmp[1],aux,"<");
+                            relacoes[aux[1]]++;
+                        } 
+                        else if(tmp[1]~/@/){
+                            split(tmp[1],aux,"@");
+                            relacoes[aux[2]]++;
+                        }
+                        else{
+                            relacoes[tmp[1]]++;
+                        }
+                    }
+                    else if($i!=""){
+                        if($i~/</){
+                            split($i,tmp,"<");
+                            relacoes[tmp[1]]++;
+                        }
+                        else if($i~/@/){
+                            split($i,tmp,"@");
+                            relacoes[tmp[2]]++;
+                        }
+                        else{ 
+                            relacoes[$i]++;
+                        }
+                    }
+                }
+            }
+\end{verbatim}
+    
+    Depois de termos todos os domínios, podemos retirar todas as relações, como está evidenciado em cima é um processo mais complexo que o anterior visto termos de ter em conta os caracteres especiais, bem como o número variável de campos.
+    O algoritimo consiste em percorrer todos os campos de todas as linhas que contêm a \textit{tag \%THE} do ficheiro, e realizar as verificações de espaços, caracteres especiais por exemplo \<,etc.
+    
+    Feito este tratamento da informação usamos o método utilizado nos domínios.
+
+    Posto isto realizamos a impressão do conteúdo dos arrays criados.
+ 
+
+\titulo{ Mostrar os Triplos Expandidos Correspondentes (Triplo por linha)}
+
+    Neste segundo ponto tivemos que gerar triplos de informação consoante as relações de cada ficheiro, portanto para a resolução deste ponto precisamos de guardar informação das relações e informação do texto envolvido nessa relação.
+
+
+\bigskip
+
+\begin{verbatim}
+BEGIN       { FS = ":"; RS = "\n";IGNORECASE = 1; }
+\end{verbatim}
+    
+    Tal como no ponto anterior, o \textit{Field Separator} e \textit{Record Separator} mantêm-se. 
+
+\begin{verbatim}
+$1~/%inv/   {
+                split($2,segundo," ");
+                split($3,terceiro," ");
+                inversos[segundo[1]] = terceiro[1]; 
+            }
+\end{verbatim}
+
+    Depois de definirmos o \textit{Field Separator} e o \textit{Record Separator}, começamos por retirar todas as relações inversas, guardando-as num \textit{array}, estas relações estão presentes nas linhas com a \textit{tag \%inv}.
+    Antes de as guardarmos realizamos dois \textit{split()}, de modo a tratar os espaços presentes nos ficheiros.
+
+    Guardar as relações inversas é importante para a criação dos triplos das relações inversas.
+
+
+\begin{verbatim}
+$1~/%THE/   { 
+                if($1~/</){
+                    split($1,uni,"<");
+                    unico = uni[2];
+                }
+
+                for(i=2; i<NF+1;i++){
+                    
+                    if($i~/ ./ || $i~/.* /){
+                        split($i,tmp," ");
+                        if(tmp[1]~/</){
+                            split(tmp[1],aux,"<");
+                            relacoes[i] = aux[1];
+                            instancia[i] = aux[2];
+                        } 
+                        else if(tmp[1]~/@/){
+                            split(tmp[1],aux,"@");
+                            relacoes[i]= aux[2];
+                        }
+                        else{
+                            relacoes[i]=tmp[1];
+                        }
+                    }
+                    else if($i!=""){
+                        if($i~/</){
+                            split($i,tmp,"<");
+                            relacoes[i]=tmp[1];
+                            instancia[i]=tmp[2];
+                        }
+                        else if($i~/@/){
+                            split($i,tmp,"@");
+                            relacoes[i]=tmp[2]
+                        }
+                        else{ 
+                            relacoes[i]=$i;
+                        }
+                    }
+                }
+            }
+\end{verbatim}
+
+    Para este ponto também precisamos de ir buscar as relações, de modo a conseguirmos formar os triplos, por exemplo \textbf{Ficheiro riospt.mdic - (rio Cávado,nasce\_em,serra do Larouco) }, para que tal aconteça temos de comecar por separar o primeiro campo, caso tenha caracteres especiais. 
+
+    Pôs esta separação, realizamos um processo parecido ao do primeiro ponto, diferenciando-se pelo facto de não indexarmos o \textit{array} por relação, e de não contarmos o número de ocorrências.    
+
+
+\begin{verbatim}
+1!~/%/ &&  $1!~/#/ {    
+            if(unico!="" && $1!=""){
+            print("("$1",iof,"unico")");
+            }
+
+            for(i=2; i<NF+1;i++){
+                if($i~/|/){
+                    split($i,triplos,"|");
+                    for(t in triplos){
+                        print("("$1","relacoes[i]","triplos[t]")");
+                        if(instancia[i] != ""){
+                            print("("triplos[t]",iof,"instancia[i]")");
+                        }
+                        for(inv in inversos){
+                            if(relacoes[i]==inv){
+                                print ("("triplos[t]","inversos[inv]","$1")");
+                            }
+                        }
+                    }
+
+                }
+                else if($i!=""){
+                        print("("$1","relacoes[i]","$i")");
+                        if(instancia[i] != ""){
+                            print("("$i",iof,"instancia[i]")");
+                        }
+                        for(inv in inversos){
+                            if(relacoes[i]==inv){
+                                print ("("$i","inversos[inv]","$1")");
+                            }
+                        }
+                    }
+            }
+        }
+\end{verbatim}
+
+    A fase final da resolução do ponto, consiste em formar os triplos, e a sua respectiva impressão, para tal partirmos a informação caso haja mais que uma designação ou seja caso haja uma ou mais \textbf{\textbar}, a medida que vamos percorrendo os \textit{arrays} criados, vamos imprimindo a informação com a formatação pretendida.
+    
+    Neste ponto como necessitamos da informação presente nas linhas sem as \textit{tags} começadas \textit{\%} e sem as começadas por \textit{\# (Linhas comentadas)}, recorremos a \textbf{expressão regular} evidenciada em cima, de modo, a filtrar a informação pretendida. 
+
+    Evidencio neste ponto a impressão das instanciâs além da impressão dos triplos inversos já referidos, isto é, por exemplo o seguinte triplo \textbf{Ficheiro riospt.mdic - (rio Cávado,iof,rio)}.
+
+
+\titulo{ Mostrar a informacão contidas nos triplos, agrupadas pelo termo1 (formato Thesaurus ISO) }
+
+    O último ponto do nosso enunciado, consiste em mostrar a informação anterior, mas agora com a formatação de um \textit{ISO}.
+
+\bigskip
+
+\begin{verbatim}
+BEGIN       { FS = ":"; RS = "\n";IGNORECASE=1; filename = "thesaurus.txt"; }
+\end{verbatim}
+
+    Tal como nos pontos anteriores, temos o mesmo \textit{Field Separator} e \textit{Record Separator}. A única diferença é que agora acrescentamos a váriavel \textit{filename} que possui o nome do ficheiro onde vamos escrever a informação.
+
+\begin{verbatim}
+    $1~/%inv/   {
+                split($2,segundo," ");
+                while(segundo[1]~/ ./){
+                    split(segundo[1],segundo," ");
+                }
+                split($3,terceiro," ");
+                while(terceiro[1]~/ ./){
+                    split(terceiro[1],terceiro," ");
+                }
+                inversos[segundo[1]] = terceiro[1]; 
+            } 
+\end{verbatim}
+    
+    Tal como no segundo ponto, vamos retirar as relações inversas, só que neste caso devido a um erro detetado, tivemos de alterar o algorítmo, de modo, a remover os espaços atrás da palavra filtrada quer a frente da mesma. De resto a informação é guardada de forma indêntica.
+
+\begin{verbatim}
+$1~/%THE/   { 
+                if($1~/</){
+                    split($1,uni,"<");
+                    unico = uni[2];
+                }
+
+                for(i=2; i<NF+1;i++){
+                    
+                    if($i~/ ./ || $i~/.* /){
+                        split($i,tmp," ");
+                        if(tmp[1]~/</){
+                            split(tmp[1],aux,"<");
+                            relacoes[i] = aux[1];
+                            instancia[i] = aux[2];
+                        } 
+                        else if(tmp[1]~/@/){
+                            split(tmp[1],aux,"@");
+                            relacoes[i]= aux[2];
+                        }
+                        else{
+                            relacoes[i]=tmp[1];
+                        }
+                    }
+                    else if($i!=""){
+                        if($i~/</){
+                            split($i,tmp,"<");
+                            relacoes[i]=tmp[1];
+                            instancia[i]=tmp[2];
+                        }
+                        else if($i~/@/){
+                            split($i,tmp,"@");
+                            relacoes[i]=tmp[2]
+                        }
+                        else{ 
+                            relacoes[i]=$i;
+                        }
+                    }
+                }
+            }
+\end{verbatim}
+
+    Na fase de retirar e guardar as relações, o algorítmo não sofreu alterações em relação ao segundo ponto.
+
+\begin{verbatim}
+$1!~/%/ &&  $1!~/#/ && $1!=""{  
+    print($1)>filename;
+    
+    if(unico!="" && $1!=""){
+        print("iof: "unico)> filename;
+    }
+
+    for(i=2; i<NF+1;i++){
+                            
+        if($i~/|/){
+            split($i,triplos,"|");
+            for(t in triplos){
+                print(relacoes[i]": "triplos[t])>filename;
+            }
+        }
+        else if($i!=""){
+            print(relacoes[i]": "$i)>filename;
+        }
+    }
+    printf("\n")>filename;
+
+    for(i=2;i<NF+1;i++){
+        if($i!=""){
+            if(inversos[relacoes[i]]!=""){
+                if($i~/|/){
+                    split($i,tripletes,"|");
+                    for(t in tripletes){
+                        print(tripletes[t])>filename;
+                        print(inversos[relacoes[i]]": " $1)>filename;
+                        if(instancia[i]!=""){
+                            print("iof: "instancia[i])>filename;
+                        }
+                        printf("\n")>filename;
+                    }
+                }
+                else{
+                    print($i)>filename;
+                    print(inversos[relacoes[i]]": " $1)>filename;
+                    if(instancia[i]!=""){
+                        print("iof: "instancia[i])>filename;
+                }
+            }
+          }
+        }
+    }
+}                          
+\end{verbatim}
+
+    Como evidenciado no algorítmo acima, a \textbf{expressão regular} vai filtrar todas as linhas que não comecem com \texbf{\%} e \textbf{\#} tal como anteriormente, só que desta vez filtamos só as linhas que não são vazias.
+
+    Neste ponto o todas as impressões são feitas para o ficheiro guardado na variável inicial. Como o formato de impressão é diferente tivemos que alterar o algoritmo anterior, de modo, a imprimimos o os triplos iniciais e só depois as relações inversas criamos dois ciclos que percorrem todos os campos, das linhas filtradas.
+
+
+
+\titulo{ Construir um conjunto de páginas HTML (uma página por cada termo1) em que os termos2 hiperliguem às correspondentes páginas }
+
+    Este ponto pertence ao enunciado 5, foi o ponto extra que decidimos implementar, visto estar relacionado com o nosso enunciado, uma vez que trabalhamos sobre os mesmos tipos de ficheiros.
+
+    Neste ponto o objectivo é construir páginas \textit{HTML}, com informação presente nos ficheiros.
+
+\bigskip  
+
+\begin{verbatim}
+BEGIN       { FS = ":"; RS = "\n";IGNORECASE=1; filename = "thesaurus.html"; print("<html>")>filename; print("\t<body>")>filename; }
+\end{verbatim}
+
+    Começamos por definir uma variável com o tipo de ficheiro, e duas impressões para o respectivo ficheiro criado com os cabeçalhos presentes no \textit{HTML}.
+
+    Tal como nos pontos anteriores, guardamos a informação relativa as relações inversas, repetindo o algoritmo feito anteriormente.
+
+    Seguindo o mesmo raciocínio anteriormente exposto, retiramos todas as relações existentes em cada ficheiro.
+
+\begin{verbatim}
+$1!~/%/ &&  $1!~/#/ && $1!=""{  
+        auxfile = $1".html"; 
+        print("<html>")>auxfile; 
+        print("\t<body>")>auxfile; 
+                                
+        print("<a href=\""$1".html\">"$1"</a><br>")>filename;
+
+        if(unico!="" && $1!=""){
+            print("<p>"$1"</p>")>auxfile;
+            print("\t\t<ul>")>auxfile;
+            print("<li>iof: "unico"</li>")>auxfile;
+        }
+
+        for(i=2; i<NF+1;i++){
+                            
+            if($i~/|/){
+                split($i,triplos,"|");
+                for(t in triplos){
+                    print("<li>"relacoes[i]": "triplos[t]"</li>")>auxfile;
+                }
+            }
+            else if($i!=""){
+                    print("<li>"relacoes[i]": "$i"</li>")>auxfile;
+                }
+            }
+
+            print("\t\t</ul>")>auxfile;
+            print("<p> INVERSOS </p>")>auxfile;
+            print("<p></p>")>auxfile;
+
+            for(i=2;i<NF+1;i++){
+                if($i!=""){
+                    if(inversos[relacoes[i]]!=""){
+                        if($i~/|/){
+                            split($i,tripletes,"|");
+                            for(t in tripletes){
+                                print("<p>"tripletes[t]"</p>")>auxfile;
+                                print("\t\t<ul>")>auxfile;
+                                print("<li>"inversos[relacoes[i]]": " $1"</li>")>auxfile;
+                                if(instancia[i]!=""){
+                                    print("<li>iof: "instancia[i]"</li>")>auxfile;
+                                }
+                                print("\t\t</ul>")>auxfile;
+                            }
+                        }
+                        else{
+                            print("<p>"$i"</p>")>auxfile;
+                            print("\t\t<ul>")>auxfile;
+                            print("<li>"inversos[relacoes[i]]": " $1"</li>")>auxfile;
+                            if(instancia[i]!=""){
+                                print("<li>iof: "instancia[i]"</li>")>auxfile;
+                            }
+                            print("\t\t</ul>")>auxfile;
+                        }
+                    }
+                }
+            }
+            print("\t</body>")>auxfile;
+            print("</html>")>auxfile;
+    }
+\end{verbatim} 
+
+    Esta acção contêm todas as impressões de informação necessárias para gerar as páginas \textit{HTML}, tal como aconteceu no ponto anterior percorremos os \textit{arrays} criados a medida que percorremos as linhas filtradas pela \textbf{expressão regular} acima evidenciada. 
+
+    Ao percorremos estas linhas vamos imprimindo a informação para o ficheiro, respeitando as normas de criação de uma página páginas \textit{HTML}. 
+
+\begin{verbatim}
+END {print("\t</body>")>filename;print("</html>")>filename;}
+\end{verbatim}
+
+    Por último terminamos a criação das páginas com a impressão das \textit{tags HTML} para termirnar uma página. 
+
+
+\chapter{Conclusão} \label{concl}
+
+    O uso do sistema de produção GAWK torna a implementação de um filtro de texto capaz de fazer o reconhecimento de padrões e proceder à sua transformação, um exercício de complexidade inferior àquela que o enunciado sugere. Em particular, tal como é descrito neste documento, é possível obter as mais diversas informações sobre o conteúdo de ficheiros, realizando com elas computações de grande utilidade para o utilizador/programador. Mais, é possível produzir conhecimento a partir de informação que se antevia desconexa (e.g., listagem total dos rios e serras portuguesas, saber onde nascem e desaguam e que cidades atravessam). Os resultados produzidos pelos filtros implementados impressionam pela sua precisão e utilidade, sobretudo quando se tem em conta o pequeno tamanho e complexidade dos scripts que os originaram. Os filtros implementados respondem aos requisitos impostos pelos enunciados (e não só), pelo que este grupo de trabalho se considera sobremaneira satisfeito. Como trabalho futuro, é evidente que esta ferramenta tem capacidade para produzir filtros diferentes de forma a captar informação alternativa á que foi capturada neste trabalho, portanto, mais funcionalidades podem ser implementadas.
+
+\bibliographystyle{alpha}
+\bibliography{relprojLayout}
+
+
+
+\end{document} 
