@@ -1,4 +1,4 @@
-BEGIN 		{ FS = ":"; RS = "\n";IGNORECASE = 1;i=1;k=1;l=1; }
+BEGIN 		{ FS = ":"; RS = "\n";IGNORECASE = 1;}
 $1~/%dom/ 	{ dominios[$2]++;}
 $1~/%THE/	{
 				for(i=2; i<NF+1;i++){
