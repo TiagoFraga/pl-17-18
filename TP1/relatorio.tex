@@ -83,7 +83,7 @@
 \maketitle
 
 \begin{abstract}
-    Neste relatório será abordado a resolução e verificação do segundo trabalho prático da unidade curricular de Processamento de Linguagens. Será possível encontrar a forma como abordamos o problema proposto bem como uma explicação detalhada do código elaborado.
+    Neste relatório será abordado a resolução e verificação do primeiro trabalho prático da unidade curricular de Processamento de Linguagens. Será possível encontrar a forma como abordamos o problema proposto bem como uma explicação detalhada do código elaborado.
     
     Foi ainda trabalhado um ponto extra diferente dos que nos foram propostos no enunciado, visto utilizar os mesmos ficheiros e de modo a aprimorar os nossos conhecimentos ao nível desta nova Linguagem.
 \end{abstract}
@@ -239,7 +239,7 @@ $1~/%THE/   {
 
     Para este ponto também precisamos de ir buscar as relações, de modo a conseguirmos formar os triplos, por exemplo \textbf{Ficheiro riospt.mdic - (rio Cávado,nasce\_em,serra do Larouco) }, para que tal aconteça temos de comecar por separar o primeiro campo, caso tenha caracteres especiais. 
 
-    Pôs esta separação, realizamos um processo parecido ao do primeiro ponto, diferenciando-se pelo facto de não indexarmos o \textit{array} por relação, e de não contarmos o número de ocorrências.    
+    Depois desta separação, realizamos um processo parecido ao do primeiro ponto, diferenciando-se pelo facto de não indexarmos o \textit{array} por relação, e de não contarmos o número de ocorrências.    
 
 
 \begin{verbatim}
@@ -281,7 +281,7 @@ $1~/%THE/   {
 
     A fase final da resolução do ponto, consiste em formar os triplos, e a sua respectiva impressão, para tal partirmos a informação caso haja mais que uma designação ou seja caso haja uma ou mais \textbf{\textbar}, a medida que vamos percorrendo os \textit{arrays} criados, vamos imprimindo a informação com a formatação pretendida.
     
-    Neste ponto como necessitamos da informação presente nas linhas sem as \textit{tags} começadas \textit{\%} e sem as começadas por \textit{\# (Linhas comentadas)}, recorremos a \textbf{expressão regular} evidenciada em cima, de modo, a filtrar a informação pretendida. 
+    Neste ponto como necessitamos da informação presente nas linhas sem as \textit{tags} começadas \textit{\%} e sem as começadas por \textit{\# (Linhas comentadas)}, recorremos a \textbf{expressão regular} evidenciada em cima, de modo a filtrar a informação pretendida. 
 
     Evidencio neste ponto a impressão das instanciâs além da impressão dos triplos inversos já referidos, isto é, por exemplo o seguinte triplo \textbf{Ficheiro riospt.mdic - (rio Cávado,iof,rio)}.
 
@@ -312,7 +312,7 @@ BEGIN       { FS = ":"; RS = "\n";IGNORECASE=1; filename = "thesaurus.txt"; }
             } 
 \end{verbatim}
     
-    Tal como no segundo ponto, vamos retirar as relações inversas, só que neste caso devido a um erro detetado, tivemos de alterar o algorítmo, de modo, a remover os espaços atrás da palavra filtrada quer a frente da mesma. De resto a informação é guardada de forma indêntica.
+    Tal como no segundo ponto, vamos retirar as relações inversas, só que neste caso devido a um caso específico que influênciava este resultado, tivemos de alterar o algorítmo, de modo, a remover os espaços atrás da palavra filtrada quer a frente da mesma. De resto a informação é guardada de forma indêntica.
 
 \begin{verbatim}
 $1~/%THE/   { 
@@ -367,7 +367,8 @@ $1!~/%/ &&  $1!~/#/ && $1!=""{
     }
 
     for(i=2; i<NF+1;i++){
-                            
+                             desta separação, realizamos um processo parecido ao do primeiro ponto, diferenciando-se pelo facto de não indexarmos o \textit{array} por relação, e de não contarmos o número de ocorrências.    
+
         if($i~/|/){
             split($i,triplos,"|");
             for(t in triplos){
@@ -494,7 +495,7 @@ $1!~/%/ &&  $1!~/#/ && $1!=""{
     }
 \end{verbatim} 
 
-    Esta acção contêm todas as impressões de informação necessárias para gerar as páginas \textit{HTML}, tal como aconteceu no ponto anterior percorremos os \textit{arrays} criados a medida que percorremos as linhas filtradas pela \textbf{expressão regular} acima evidenciada. 
+    Esta acção contêm todas as impressões de informação necessárias para gerar as páginas \textit{HTML} tal como aconteceu no ponto anterior percorremos os \textit{arrays} criados a medida que percorremos as linhas filtradas pela \textbf{expressão regular} acima evidenciada. 
 
     Ao percorremos estas linhas vamos imprimindo a informação para o ficheiro, respeitando as normas de criação de uma página páginas \textit{HTML}. 
 
