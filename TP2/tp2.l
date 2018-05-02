@@ -200,7 +200,7 @@ char* tag;
 													BEGIN INITIAL;
 												}
 \>												{
-													if(strcmp(tag,"obs")==0){
+													if(strcmp(tag,"obs")==0 || strcmp(tag,"pai")==0 || strcmp(tag,"mae")==0  ){
 														BEGIN INITIAL;
 													}else{
 														printf("TAG_C_FILHO: -> %s\n",tag );
