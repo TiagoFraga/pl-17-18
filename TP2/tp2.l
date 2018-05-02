@@ -165,55 +165,82 @@ int imprimeLista(Document* doc){
 	return 0;
 }
 
+
 Document* doc;
-int ativo;
-char* principal;
+char* hierarquia[20];
+int nivel;
+char* tag;
 
 
 
 %}
 
-%x TAG PRINCIPAL SECUNDARIA
+%x TAG FECHO_TAG TAG_QUANDO
 
 
 %%
 
 <INITIAL>{
-\<.*?[!=?].*\>						{;}
-\<.*\/\>							{;}
-\<\/.*\>							{ativo = 0;}
-\<									{BEGIN PRINCIPAL;}
-\<.*\>.*\<\/						{BEGIN SECUNDARIA;}		
+[a-zA-Z0-9]+									{;}
+\<[?].*[?]\>									{;}
+\<[!].*\>										{;}
+\<quando.*\/									{BEGIN TAG_QUANDO;}
+\<obs\/\>										{;}
+\<												{BEGIN TAG;}
+\<\/											{BEGIN FECHO_TAG;}
 }
-<SECUNDARIA>{
-[a-zA-Z0-9]+						{
-										if(ativo==1){
-											adicionaSecudaryNode(doc, principal,yytext);
-											
-										}
-
-									}
-[a-zA-Z0-9]+?[_][a-zA-Z0-9]+		{
-										if(ativo==1){
-											adicionaSecudaryNode(doc,principal,yytext);
-										}
-									}
-\>									{BEGIN INITIAL;}
+<TAG>{
+[a-zA-Z0-9]+									{tag = strdup(yytext);}
+[a-zA-Z0-9]+?[_][a-zA-Z0-9]+					{tag = strdup(yytext);}
+[ ].*[=].*\> 									{	
+													printf("TAG_ATRIBUICAO: -> %s\n",tag );
+													hierarquia[nivel] = strdup(tag);
+													nivel++;
+													adicionaPrincipalNode(doc,tag);
+													BEGIN INITIAL;
+												}
+\>												{
+													if(strcmp(tag,"obs")==0){
+														BEGIN INITIAL;
+													}else{
+														printf("TAG_C_FILHO: -> %s\n",tag );
+														hierarquia[nivel] = strdup(tag);
+														nivel++;
+														adicionaPrincipalNode(doc,tag);
+														BEGIN INITIAL;
+													}
+												}
+\>.*\<\/.*\>									{
+													printf("TAG_S_FILHO: -> %s\n",tag );
+													adicionaSecudaryNode(doc,hierarquia[nivel-1],tag);
+													BEGIN INITIAL;
+												}
 }
-<PRINCIPAL>{
-[a-zA-Z0-9]+						{
-										ativo = 1;
-										principal = strdup(yytext);
-										adicionaPrincipalNode(doc,yytext);
-									}
-[a-zA-Z0-9]+?[_][a-zA-Z0-9]+		{
-										ativo = 1;
-										principal = strdup(yytext);
-										adicionaPrincipalNode(doc,yytext);
-									}
-\>									{BEGIN INITIAL;}	
+<FECHO_TAG>{
+[a-zA-Z0-9]+									{tag = strdup(yytext);}
+[a-zA-Z0-9]+?[_][a-zA-Z0-9]+					{tag = strdup(yytext);}	
+\>												{
+													if(strcmp(tag,"obs")==0){
+														BEGIN INITIAL;
+													}else{
+														printf("FECHO_TAG: -> %s\n", tag);
+														nivel--;
+														free(hierarquia[nivel]);
+														if(nivel!=0){
+															adicionaSecudaryNode(doc,hierarquia[nivel-1],tag);
+														}
+														BEGIN INITIAL;
+													}
+												}
 }
-.|\n								{}
+<TAG_QUANDO>{
+\>												{
+													printf("TAG_QUANDO: -> quando\n");
+													adicionaSecudaryNode(doc,hierarquia[nivel-1],"quando");
+													BEGIN INITIAL;	
+												}	
+}
+.|\n											{;}
 
 
 %%
@@ -224,6 +251,12 @@ int yywrap(){
 
 int main(){
 	doc = initDoc();
+	tag = NULL;
+	int i;
+	for(i=0;i<20;i++){
+		hierarquia[i] = NULL;
+	}
+	nivel=0;
 	yylex();
 	imprimeLista(doc);
 	return 0;
