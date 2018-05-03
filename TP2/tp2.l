@@ -146,7 +146,7 @@ int verificaSecundario(Document* doc, char* principal, char* nome){
 
 int imprimeLista(Document* doc){
 	int fd = open("graph.dot",O_CREAT|O_WRONLY,0666);
-	write(fd,"digraph tp2{",strlen("digraph tp2{"));
+	write(fd,"strict digraph tp2{",strlen("strict digraph tp2{"));
 	write(fd,"\n",1);
 	Lista* lista = doc->tag_principal;
 	while(lista){
@@ -193,7 +193,6 @@ char* tag;
 [a-zA-Z0-9]+									{tag = strdup(yytext);}
 [a-zA-Z0-9]+?[_][a-zA-Z0-9]+					{tag = strdup(yytext);}
 [ ].*[=].*\> 									{	
-													printf("TAG_ATRIBUICAO: -> %s\n",tag );
 													hierarquia[nivel] = strdup(tag);
 													nivel++;
 													adicionaPrincipalNode(doc,tag);
@@ -203,7 +202,6 @@ char* tag;
 													if(strcmp(tag,"obs")==0 || strcmp(tag,"pai")==0 || strcmp(tag,"mae")==0  ){
 														BEGIN INITIAL;
 													}else{
-														printf("TAG_C_FILHO: -> %s\n",tag );
 														hierarquia[nivel] = strdup(tag);
 														nivel++;
 														adicionaPrincipalNode(doc,tag);
@@ -211,7 +209,6 @@ char* tag;
 													}
 												}
 \>.*\<\/.*\>									{
-													printf("TAG_S_FILHO: -> %s\n",tag );
 													adicionaSecudaryNode(doc,hierarquia[nivel-1],tag);
 													BEGIN INITIAL;
 												}
@@ -223,7 +220,6 @@ char* tag;
 													if(strcmp(tag,"obs")==0){
 														BEGIN INITIAL;
 													}else{
-														printf("FECHO_TAG: -> %s\n", tag);
 														nivel--;
 														free(hierarquia[nivel]);
 														if(nivel!=0){
@@ -235,7 +231,6 @@ char* tag;
 }
 <TAG_QUANDO>{
 \>												{
-													printf("TAG_QUANDO: -> quando\n");
 													adicionaSecudaryNode(doc,hierarquia[nivel-1],"quando");
 													BEGIN INITIAL;	
 												}	

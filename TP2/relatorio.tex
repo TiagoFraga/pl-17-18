@@ -1,0 +1,419 @@
+%
+% Layout retirado de http://www.di.uminho.pt/~prh/curplc09.html#notas
+%
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+\usepackage[latin1]{inputenc}
+\usepackage[portuguese]{babel}
+
+\usepackage{url}
+\usepackage{enumerate}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+
+%\usepackage{alltt}
+%\usepackage{fancyvrb}
+\usepackage{listings}
+%LISTING - GENERAL
+\lstset{
+	basicstyle=\small,
+	numbers=left,
+	numberstyle=\tiny,
+	numbersep=5pt,
+	breaklines=true,
+    frame=tB,
+	mathescape=true,
+	escapeinside={(*@}{@*)}
+}
+%
+%\lstset{ %
+%	language=Java,							% choose the language of the code
+%	basicstyle=\ttfamily\footnotesize,		% the size of the fonts that are used for the code
+%	keywordstyle=\bfseries,					% set the keyword style
+%	%numbers=left,							% where to put the line-numbers
+%	numberstyle=\scriptsize,				% the size of the fonts that are used for the line-numbers
+%	stepnumber=2,							% the step between two line-numbers. If it's 1 each line
+%											% will be numbered
+%	numbersep=5pt,							% how far the line-numbers are from the code
+%	backgroundcolor=\color{white},			% choose the background color. You must add \usepackage{color}
+%	showspaces=false,						% show spaces adding particular underscores
+%	showstringspaces=false,					% underline spaces within strings
+%	showtabs=false,							% show tabs within strings adding particular underscores
+%	frame=none,								% adds a frame around the code
+%	%abovecaptionskip=-.8em,
+%	%belowcaptionskip=.7em,
+%	tabsize=2,								% sets default tabsize to 2 spaces
+%	captionpos=b,							% sets the caption-position to bottom
+%	breaklines=true,						% sets automatic line breaking
+%	breakatwhitespace=false,				% sets if automatic breaks should only happen at whitespace
+%	title=\lstname,							% show the filename of files included with \lstinputlisting;
+%											% also try caption instead of title
+%	escapeinside={\%*}{*)},					% if you want to add a comment within your code
+%	morekeywords={*,...}					% if you want to add more keywords to the set
+%}
+
+\usepackage{xspace}
+
+\setlength{\parindent}{3em}
+\setlength{\parskip}{1em}
+
+\setlength{\oddsidemargin}{-1cm}
+\setlength{\textwidth}{18cm}
+\setlength{\headsep}{-1cm}
+\setlength{\textheight}{23cm}
+
+\def\darius{\textsf{Darius}\xspace}
+\def\antlr{\texttt{AnTLR}\xspace}
+\def\pe{\emph{Publicação Eletrónica}\xspace}
+
+\def\titulo#1{\section{#1}}
+\def\super#1{{\em Supervisor: #1}\\ }
+\def\area#1{{\em \'{A}rea: #1}\\[0.2cm]}
+\def\resumo{\underline{Resumo}:\\ }
+
+
+
+\title{Processamento de Linguagens\\ \textbf{Trabalho Prático nº2 (Flex)}\\ \textbf{XML to Dot} \\Relatório de Desenvolvimento}
+
+\author{Cesário Perneta\\ a73883 \and João Gomes\\ a74033 \and Tiago Fraga\\ a74092}
+\date{\today}
+
+\begin{document}
+
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{xleftmargin=.5in}
+
+\maketitle
+
+\begin{abstract}
+    Neste relatório será abordado a resolução e verificação do segundo trabalho prático da unidade curricular de Processamento de Linguagens. Será possível encontrar a forma como abordamos o problema proposto bem como uma explicação detalhada do código elaborado.
+\end{abstract}
+
+\tableofcontents
+
+\chapter{ XML to Dot} \label{intro}
+    
+    O nosso grupo teve como enunciado o \textit{XML to Dot}, neste enunciado foi nos proposto que fizessemos uma análise aos ficheiros \textit{.xml} fornecidos. 
+    Depois de efetuada esta análise, foi nos pedido que desenvolvessemos um programa em \textit{Flex} de modo a gerar um grafo de dependências entre os elementos de um documento anotado em \textit{XML}.
+    Para gerar o Grafo tivemos de escrever linhas do tipo \textit{Dot-graphviz}, criando assim um ficheiro com  a extensão \textit{.dot}.         
+
+\titulo{ Estrutura de Dados }
+
+    Começamos por definir uma estrutura de dados capaz de guardar todas as \textit{tags} do ficheiro \textit{XML} que continham dependências de modo a construir o grafo corretamente.
+
+\bigskip
+
+\begin{verbatim}
+typedef struct doc {
+    Lista* tag_principal;       
+}Document;
+\end{verbatim}
+
+    Esta é a estrutura capaz de guardar o apontador para o inicio da lista de \textit{tags} principais, importante para a criação do grafo de dependências. Esta estrutura possui só um array de apontadores.  
+ 
+
+\begin{verbatim}
+typedef struct lista{
+    char* principal;
+    struct array* filho;
+    struct lista* next;
+}Lista;
+\end{verbatim}
+
+    Esta é a estrutura principal da nossa implementação, contêm a \textit{tag} principal, ou seja, guarda a \textit{tag} que possui sub-elementos, contêm ainda uma estrutura auxiliar explicada a seguir e o apontador para a próxima posição da lista.
+    
+    
+
+\begin{verbatim}
+typedef struct array{
+    char* tag;
+    struct array* next;
+}Array;
+\end{verbatim}
+    
+    Esta estrutura contêm todos os sub-elementos relativos a \textit{tag} principal em causa, ou seja, tem o nome da \textit{tag} e o apontador para a próxima posição da tabela.
+
+\begin{verbatim}
+// cria uma nova estrutura capaz de armazenar uma tag secundária.
+Array* newSecundaryTag(char* nome);
+
+//cria uma nova estrutura capaz de armazenar uma tag principal.
+Lista* newPrincipalNode(char* nome);
+
+//inicia a estrutura com os apontadores para a Lista de tags principais.
+Document* initDoc();
+
+//adiciona uma nova tag principal.
+int adicionaPrincipalNode(Document* doc,char* nome);
+
+//adiciona uma nova tag secundária.
+int adicionaSecudaryNode(Document* doc, char* principal, char* nome);
+
+//verifica se a tag principal já está armazenada.
+int verificaPrincipal(Document* doc, char* nome);
+
+//verifica se a tag secundária já está armazenada.
+int verificaSecundario(Document* doc, char* principal, char* nome);
+\end{verbatim}
+
+    Apresentamos aqui as funções importantes para manipular as estruturas criadas.
+
+\begin{verbatim}
+int imprimeLista(Document* doc){
+    int fd = open("graph.dot",O_CREAT|O_WRONLY,0666);
+    write(fd,"digraph tp2{",strlen("digraph tp2{"));
+    write(fd,"\n",1);
+    Lista* lista = doc->tag_principal;
+    while(lista){
+        Array* array = lista->filho;
+        while(array){
+            write(fd,lista->principal,strlen(lista->principal));
+            write(fd,"->",strlen("->"));
+            write(fd,array->tag,strlen(array->tag));
+            write(fd,"\n",1);
+            array = array->next;
+        }
+        lista = lista->next;
+    }
+    write(fd,"}",1);
+    close(fd);
+    return 0;
+}
+\end{verbatim}
+    
+    Salientamos esta função,visto ser, a função que trata da criação e da escrita no ficheiro \textit{.dot}. Esta trata de percorrer a estrutura depois de criada de modo a imprimir de acordo com as regras de um ficheiro \textit{.dot} e criando assim o grafo a apresentar.
+
+\titulo{Filtagem da Informação}
+
+    Neste capítulo apresentamos como filtramos o texto de modo a guardar a informação pretendida nas estruturas criadas.
+    Vamos mostrar e explicar as codinções de contexto e expressões regulares utilizadas.
+
+
+\bigskip
+
+\begin{verbatim}
+%x TAG FECHO_TAG TAG_QUANDO
+\end{verbatim}
+    
+    Esta instrução contêm o nome das condições de contexto utilizadas, importante para o  funcionamento das mesmas. 
+
+\begin{verbatim}
+<INITIAL>{
+[a-zA-Z0-9]+         {;}
+\<[?].*[?]\>         {;}
+\<[!].*\>            {;}
+\<quando.*\/         {BEGIN TAG_QUANDO;}
+\<obs\/\>            {;}
+\<                   {BEGIN TAG;}
+\<\/                 {BEGIN FECHO_TAG;}
+}
+\end{verbatim}
+
+    Esta condição de contexto serve para filtrar tudo o que não pretendemos apanhar e iniciar as condições de contexto em que guardamos as \textit{tags} principais e secundárias. Em seguida temos a explicação de cada expressão regular. 
+
+\begin{verbatim}
+[a-zA-Z0-9]+   {;}
+\end{verbatim}
+    
+    Com esta expressão regular conseguimos eliminar o conteúdo dentro de cada \textit{tag}, por exemplo 
+
+    \textbf{\textless NIF\textgreater987653210\textless/NIF \textgreater}, neste caso eliminamos \textbf{987653210}.
+
+\begin{verbatim}
+\<[?].*[?]\>   {;}
+\end{verbatim}
+
+    Com esta expressão regular eliminamos todas as \textit{tags} que contenham o caracter \textbf{\?}, ou seja são removidas todas as instruções de processamento, visto não interessarem para o nosso grafo.
+
+\begin{verbatim}
+\<[!].*\>      {;}
+\end{verbatim}
+
+    Por último eliminamos todos os comentários que possam surgir no ficheiro visto também não terem interesse. 
+
+\begin{verbatim}
+\<quando.*\/   {BEGIN TAG_QUANDO;}
+\end{verbatim}
+    
+    Quando apanhamos uma \textit{tag} começada por \textbf{quando} damos inicio a condição de contexto evidenciada \textbf{TAG\_QUANDO} e explicada posteriormente.
+
+\begin{verbatim}
+\<obs\/\>      {;}
+\end{verbatim}
+
+    Esta expressão regular é referente ao ficheiro \textbf{processos.xml} visto quando a \textit{tag} \textbf{obs}, quando não possui qualquer conteúdo apresentar esta representação \textbf{\textless obs\/\textgreater} e então decidimos remover para evitar situações de erro na criação do Grafo.
+
+\begin{verbatim}
+\<   {BEGIN TAG;}
+\end{verbatim}
+    
+    Quando é apanhado um sinal de \textbf{\textless} começamos a condição de contexto \textbf{TAG} explicada posteriormente.
+
+\begin{verbatim}
+\<\/    {BEGIN FECHO_TAG;}
+\end{verbatim}
+
+    Por último neste bloco inicial, iniciamos a condição de contexto \textbf{FECHO\_TAG}, quando apanhamos uma \textit{tag} de fecho do ficheiro \textbf{XML}.
+
+
+\begin{verbatim}
+<TAG>{
+[a-zA-Z0-9]+                   {tag = strdup(yytext);}
+[a-zA-Z0-9]+?[_][a-zA-Z0-9]+   {tag = strdup(yytext);}
+[ ].*[=].*\>{   
+                                                   
+    hierarquia[nivel] = strdup(tag);
+    nivel++;
+    adicionaPrincipalNode(doc,tag);
+    BEGIN INITIAL;
+}
+\>{
+    if(strcmp(tag,"obs")==0 || strcmp(tag,"pai")==0 || strcmp(tag,"mae")==0  ){
+    BEGIN INITIAL;
+    }else{
+        hierarquia[nivel] = strdup(tag);
+        nivel++;
+        adicionaPrincipalNode(doc,tag);
+        BEGIN INITIAL;
+    }
+}
+\>.*\<\/.*\>{
+        adicionaSecudaryNode(doc,hierarquia[nivel-1],tag);
+        BEGIN INITIAL;
+    }
+}
+\end{verbatim}
+
+    Depois do bloco inicial, temos a condição de contexto \textbf{TAG}, vai ser neste bloco que vamos começar a adicionar as \textit{tags} a estrutura criada.
+
+\begin{verbatim}
+[a-zA-Z0-9]+                   {tag = strdup(yytext);}
+[a-zA-Z0-9]+?[_][a-zA-Z0-9]+   {tag = strdup(yytext);}
+\end{verbatim}
+
+    Estas expressões regulares são para apanhar os nomes das \textit{tags} e por sua vez guardar esse nome numa vaŕiável.
+
+
+\begin{verbatim}
+[ ].*[=].*\> {   
+                                                   
+    hierarquia[nivel] = strdup(tag);
+    nivel++;
+    adicionaPrincipalNode(doc,tag);
+    BEGIN INITIAL;
+}
+\end{verbatim}
+
+    Sabendo a partida que as \textit{tags} com atributos são \textit{tags} principais guardamos na estrutura sempre que as apanhamos. Usando uma estrutura auxiliar chamada \textbf{hierarquia} para saber em que nível se encontra de modo a gerarmos as dependências corretamente.
+
+\begin{verbatim}
+\> {
+        if(strcmp(tag,"obs")==0 || strcmp(tag,"pai")==0 || strcmp(tag,"mae")==0  ){
+        BEGIN INITIAL;
+   }else{
+        hierarquia[nivel] = strdup(tag);
+        nivel++;
+        adicionaPrincipalNode(doc,tag);
+        BEGIN INITIAL;
+    }
+}
+\end{verbatim}
+
+    Aqui guardamos todas as \textit{tags} principais que não possuem atributos, mantendo novamente a informação quanto a sua posição na hierarquia.
+
+\begin{verbatim}
+\>.*\<\/.*\> {
+        adicionaSecudaryNode(doc,hierarquia[nivel-1],tag);
+        BEGIN INITIAL;
+    }
+}
+\end{verbatim}
+    
+    Nesta expressão regular captamos todas as \textit{tags} secundárias, relativas a \textit{tag} principal captada anteriormente e guardada no \textit{array} hierarquia no nível anterior ao que estamos colocados.
+
+
+
+\begin{verbatim}
+<FECHO_TAG>{
+[a-zA-Z0-9]+                   {tag = strdup(yytext);}
+[a-zA-Z0-9]+?[_][a-zA-Z0-9]+   {tag = strdup(yytext);} 
+\>  {
+        if(strcmp(tag,"obs")==0){
+        BEGIN INITIAL;
+        }else{
+            nivel--;
+            free(hierarquia[nivel]);
+            if(nivel!=0){
+                adicionaSecudaryNode(doc,hierarquia[nivel-1],tag);
+            }
+            BEGIN INITIAL;
+        }
+    }
+}
+\end{verbatim}
+
+    Nesta condição de contexto fazemos o tratamento quanto ao fecho de \textit{tags} do ficheiro.
+
+\begin{verbatim}
+\>  {
+        if(strcmp(tag,"obs")==0){
+        BEGIN INITIAL;
+        }else{
+            nivel--;
+            free(hierarquia[nivel]);
+            if(nivel!=0){
+                adicionaSecudaryNode(doc,hierarquia[nivel-1],tag);
+            }
+            BEGIN INITIAL;
+        }
+    }
+\end{verbatim}
+
+    Quando uma \textit{tag} fecha é adicionado como \textit{tag} secundária a \textit{tag} que está acima da mesma na hierarquia.
+
+\begin{verbatim}
+<TAG_QUANDO>{
+\>              {
+                adicionaSecudaryNode(doc,hierarquia[nivel-1],"quando");
+                BEGIN INITIAL;  
+                }   
+}
+\end{verbatim}
+    
+    Esta condição de contexto foi adicionada devido a \textit{tag} \textbf{textless quando textgreater} presente no ficheiro \textbf{legenda.xml}.
+
+
+\begin{verbatim}
+int main(){
+    doc = initDoc();
+    tag = NULL;
+    int i;
+    for(i=0;i<20;i++){
+        hierarquia[i] = NULL;
+    }
+    nivel=0;
+    yylex();
+    imprimeLista(doc);
+    return 0;
+}
+\end{verbatim}
+    
+    Esta é a nossa função \textbf{main} que trata de iniciar a estrutura e o \textbf{array} hierarquia e imprimir para o ficheiro.
+
+
+
+\chapter{Conclusão} \label{concl}
+
+    Durante a realização deste trabalho prático, que foi o segundo desta unidade curricular, várias foram as etapas que tivemos de passar para chegar ao resultado final.
+    Em comparaão com o trabalho anterior achamos que este foi mais complexo e trabalhoso, mas ao mesmo tempo foi bastante importante, visto que a sua elaboração permitiu melhorar a nossa capacidade de escrever Expressões Regulares (ER) e, a partir destas, desenvolver Processadores de Linguagem Regulares, tendo em vista a filtragem e transformação de textos.
+    Para isto foi necessário aprender e desenvolver a nossa abilidade de gerar filtros de texto em \textbf{FLex} e assim desenvolver a solução necessária para resolver o enunciado escolhido.
+    Infelizmente, ao contrário do trabalho anterior, não conseguimos resolver nenhum enunciado extra, devido a falta de tempo, para a resolução do mesmo.
+    Concluindo, no geral estamos satisfeitos com o trabalho desenvolvido, tendo este se relevado bastante útil no aperfeiçoamento das nossas habilidades no que toca a gerar filtros de texto em \textbf{FLex}.
+    
+\bibliographystyle{alpha}
+\bibliography{relprojLayout}
+
+\bibliography{relprojLayout}
+
+
+
+\end{document} 
