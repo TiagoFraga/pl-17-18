@@ -214,10 +214,8 @@ int imprimeLista(Document* doc){
 [a-zA-Z0-9]+   {;}
 \end{verbatim}
     
-    Com esta expressão regular conseguimos eliminar o conteúdo dentro de cada \textit{tag}, por exemplo 
-
-    \textbf{\textless NIF\textgreater987653210\textless/NIF \textgreater}, neste caso eliminamos \textbf{987653210}.
-
+    Com esta expressão regular conseguimos eliminar todo o texto no inicio da linha, ou seja, linhas que contenham texto antes de qualquer \textit{tag} ou só texto na linha.
+    
 \begin{verbatim}
 \<[?].*[?]\>   {;}
 \end{verbatim}

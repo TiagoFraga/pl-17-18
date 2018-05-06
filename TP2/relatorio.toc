@@ -1,0 +1,4 @@
+\contentsline {chapter}{\numberline {1} XML to Dot}{2}
+\contentsline {section}{\numberline {1.1} Estrutura de Dados }{2}
+\contentsline {section}{\numberline {1.2}Filtagem da Informa\IeC {\c c}\IeC {\~a}o}{4}
+\contentsline {chapter}{\numberline {2}Conclus\IeC {\~a}o}{8}
