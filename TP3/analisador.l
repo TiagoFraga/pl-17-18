@@ -1,65 +1,63 @@
-%{
-#include <stdio.h>
+%option noyywrap
 
-
-%}
+%x COMENTARIO LANGUAGE INV LANGU NT BT SN
 
 %%
 <INITIAL>{
-\#							{BEGIN COMENTARIO;}
-\%language					{BEGIN LANGUAGE;}
-\baselang					{BEGIN BASE;}
-\%inv						{BEGIN INV;} 
-PT							{return PT;BEGIN PT;}
-EN							{return EN;BEGIN EN;}
-NT							{return NT;BEGIN NT;}
-BT							{return BT;BEGIN BT;}
-SN							{return SN;BEGIN SN;}
-[a-z]+						{return TITULO;}
-.|\n						{;} 
+\#								{BEGIN COMENTARIO;}
+\%lang[a-zA-Z]+?				{BEGIN LANGUAGE;}
+\%baselang						{BEGIN LANGUAGE;}
+\%inv[a-zA-Z]+?					{BEGIN INV;}
+[a-z]+							{ yylval.c = strdup(yytext); return TITULO;}
+[A-Z]+[_]?[A-Z]+                {
+									if((strcmp("PT",yytext)==0)||(strcmp("EN",yytext)==0)){
+										BEGIN LANG;  
+									}
+									else if(strcmp("NT",yytext)==0){
+										BEGIN NT;
+									}
+									else if(strcmp("BT",yytext)==0){
+										BEGIN BT;
+									}else if(strcmp("SN",yytext)==0){
+										BEGIN SN;
+									}
+									yylval.c = strdup(yytext);
+									return ID;
+								}
+.|\n							{;} 
 }
 <COMENTARIO>{
-\n							{BEGIN INITIAL;}
+	.							{;}
+	\n							{BEGIN INITIAL;}
 }
 <LANGUAGE>{
-PT							{return PT;}
-EN							{return EN;}
-\n 							{BEGIN INITIAL;}
+	[A-Z]{2}					{yylval.c = strdup(yytext); return LINGUA;}
+	\n							{BEGIN INITIAL;}
 }
-<BASE>{
-PT							{return PT;}
-EN							{return EN;}
-\n 							{BEGIN INITIAL;}
-}						
 <INV>{
-BT							{return BT;}
-NT							{return NT;}
-\n 							{BEGIN INITIAL;}
+	[A-Z]+[\_]?[A-Z]+			{yylval.c = strdup(yytext); return ID;}
+	\n							{BEGIN INITIAL;}
 }
-<PT>{
-[a-z]+ 						{return TRADUCAO;}
-\n 							{BEGIN INITIAL;}
-}
-<EN>{
-[a-z]+ 						{return TRADUCAO;}
-\n 							{BEGIN INITIAL;}	
+<LANGU>{
+	[a-zA-Z]+					{yylval.c = strdup(yytext); return LINGUA;}
+	\n 							{BEGIN INITIAL;}
 }
 <NT>{
-[a-zA-Z]+ 					{return FILHO;}
-\n 							{BEGIN INITIAL;}
+	[a-zA-Z]+					{yylval.c = strdup(yytext);return TER;}
+	\,							{return yytext[0];}
+	\n 							{BEGIN INITIAL;}
 }
 <BT>{
-[a-zA-Z]+					{return PAI;}
-\n 							{BEGIN INITIAL;}
+	[a-zA-Z]+[ ]?[a-zA-Z]+		{yylval.c = strdup(yytext); return GEN;}
+	\n 							{BEGIN INITIAL;}		
 }
 <SN>{
-.*							{return }
+	.* 							{yylval.c = strdup(yytext); return STR;}
+	\n 							{BEGIN INITIAL;}
 }
+
 %%
 
-int yywrap(){
-	return 1;
-}
 
 
 

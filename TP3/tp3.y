@@ -1,87 +1,66 @@
 %{
 #include <stdio.h>
 	
-}%
+%}
 
 %union {
 	char* c;
+	char ch;
 	int n;	
 }
 
-%token<c> BT NT PT EN TITULO SN TRADUCAO STR FILHO
 
-%type<c> Programa Informacoes Metadados Conceitos Linguagens Base Inversos Lingua Inverso Conceito Relacao LangConceito FilhosConceito PaiConceito Notas Lista
+%token<c> LINGUA TITULO LANG ID GEN STR TER 
+
+%type<c> Thesaurus Metadados Conceitos Linguagens Base Inversos Inverso Conceito Derivados Generico Nota Termos Termo 
 
 %%
 
-Programa : Informacoes
-		 ;
-
-Informacoes: Metadados ':' Conceitos 
-
-Metadados : Linguagens ';' Base ';' Inversos ';'
+Thesaurus : Metadados  Conceitos 										{printf("1\n");}
 		  ;
 
-Linguagens : Lingua
-		   | Linguagens Lingua
-		   ;
+Metadados : Linguagens Base Inversos									{printf("Metadados: \n", $1,$2,$3);}
+		  ;
 
-Lingua : PT 
-	   | EN
-	   ;
+Linguagens : LINGUA 													{asprintf(&$$, "%s", $1);printf("LINGUA: %s\n",$1);}
+   		   | Linguagens LINGUA 											{asprintf(&$$, "%s %s", $1,$2);printf("Linguagens: %s %s\n",$1,$2);}
+   		   ;
 
-Base : Lingua 
+Base : LINGUA 															{asprintf(&$$, "%s", $1);printf("Base: %s\n", $1);}
 	 ;
 
-Inversos : 
-		 | Inverso 
-		 | Inversos ',' Inverso
+Inversos : Inverso                       								{asprintf(&$$, "%s", $1);printf("Inversos: %s\n",$1);}
+		 | Inversos Inverso   											{printf("8\n");}
 		 ;
 
-Inverso : Relacao Relacao
-	    ;
-
-
-Relacao : BT
-		| NT
+Inverso : ID ID															{asprintf(&$$, "%s %s", $1,$2);printf("Inverso: %s %s\n", $1,$2);}
 		;
 
-Conceitos : Conceito
- 		  | Conceitos '-' Conceito
- 		  ;
 
-Conceito : TITULO ';' LangConceito ';' FilhosConceito ';' PaiConceito ';' Notas 
+Conceitos : Conceito 													{printf("3\n");}
+		  | Conceitos Conceito  										{printf("4\n");}
+		  ;
+
+
+Conceito : TITULO LINGUA Derivados Generico Nota 						{printf("9\n");}
 		 ;
 
-LangConceito : Lingua TRADUCAO 
-             ;
 
+Derivados : ID Termos 													{printf("10\n");}
+	      ;
 
-FilhosConceito : 
-			   | NT Lista
-			   ;
+Termos : Termo 															{printf("11\n");}
+	   | Termos ',' Termo 												{printf("12\n");} 
+	   ;
 
-Lista : FILHO
-	  | Lista ',' FILHO
+Termo : TER 															{printf("13\n");}
 	  ;
 
+Generico : ID GEN  														{printf("14\n");}
+		 ;
 
-PaiConceito : 
-			| BT PAI
-			;
-
-Notas : 
-	  | SN STR
-	  ;
-
-
-
-
-
-
-
-
-
+Nota : ID STR 															{printf("NOTAS: %s %s", $1, $2);}
+	 ;
 
 
 
@@ -91,9 +70,11 @@ Notas :
 
 int yyerror(char *s){
 	printf("Erro sintatico %s\n",s);
+	return 0;
 }
 
 int main(){
 	yyparse();
 	return 0;
 }
+

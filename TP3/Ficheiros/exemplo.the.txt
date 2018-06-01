@@ -1,0 +1,23 @@
+# directivas / metadados
+%language PT EN
+%baselang EN
+%inv NT BT
+
+# conceitos:
+
+animal									
+PT animal
+NT cat, dog, cow, fish, ant
+NT camel
+BT Life being
+										
+cat
+PT gato
+BT animal
+SN animal que tem sete vidas e meia
+
+#comentário								
+
+
+
+
