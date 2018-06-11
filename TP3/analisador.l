@@ -1,6 +1,6 @@
 %option noyywrap
 
-%x COMENTARIO LANGUAGE INV LANGU NT
+%x COMENTARIO LANGUAGE INV RELACOES SN
 
 %%
 <INITIAL>{
@@ -9,20 +9,8 @@
 \%baselang						{BEGIN LANGUAGE;}
 \%inv[a-zA-Z]+?					{BEGIN INV;}
 [a-z]+							{ yylval.c = strdup(yytext); return TITULO;}
-PT								{
-									BEGIN LANGU;
-									yylval.c = strdup(yytext);
-									return LINGUA;
-								} 
-EN								{
-									BEGIN LANGU;
-									yylval.c = strdup(yytext);
-									return LINGUA;
-
-								}
-NT.*							{;}
-BT.*							{;}
-SN.*							{;}
+SN								{ yylval.c = strdup(yytext); BEGIN SN; return ID;}
+[A-Z]+							{ yylval.c = strdup(yytext); BEGIN RELACOES; return ID;}
 .|\n							{;} 
 }
 <COMENTARIO>{
@@ -37,15 +25,16 @@ SN.*							{;}
 	[A-Z]+[\_]?[A-Z]+			{yylval.c = strdup(yytext); return ID;}
 	\n							{BEGIN INITIAL;}
 }
-<LANGU>{
-	[a-zA-Z]+					{yylval.c = strdup(yytext); return TRAD;}
+<RELACOES>{
+	[A-Za-z]+[ ]?[a-z]+			{yylval.c = strdup(yytext);return TERMO;}
+	\,							{;}
 	\n 							{BEGIN INITIAL;}
 }
-<NT>{
-	[a-zA-Z]+					{yylval.c = strdup(yytext);return TER;}
-	\, 							{;}
+<SN>{
+	.*							{yylval.c = strdup(yytext); return TERMO;}
 	\n 							{BEGIN INITIAL;}
 }
+
 
 
 
