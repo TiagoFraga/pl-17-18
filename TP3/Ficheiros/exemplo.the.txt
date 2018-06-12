@@ -16,8 +16,190 @@ PT gato
 BT animal
 SN animal que tem sete vidas e meia
 
-#comentário								
+actividade politica  
+BT indice
+NT quadro politico
+NT partido politico
+NT processo eleitoral
+NT assembleia
+NT trabalhos parlamentares
+NT vida politica e seguranca publica
+NT poder executivo e administracao publica
+
+relacoes internacionais  
+BT indice
+NT politica internacional
+NT politica de cooperacao
+NT equilibrio internacional
+NT defesa
+
+comunidades europeias  
+BT indice
+NT direito comunitario
+NT construcao europeia
+NT financas comunitarias
+
+direito  
+BT indice
+NT fontes e ramos do direito
+NT direito civil
+NT direito penal
+NT justica
+NT organizacao da justica
+NT direito internacional
+NT direitos e liberdades
+
+actividade economica  
+BT indice
+NT politica economica
+NT crescimento economico
+NT regioes e politica regional
+NT estrutura economica
+NT contabilidade nacional
+NT analise economica
+
+intercambios economicos 
+BT indice
+NT politica comercial
+NT politica aduaneira
+NT trocas comerciais
+NT comercio internacional
+NT consumo
+NT comercializacao
+NT distribuicao comercial
+
+financas  
+BT indice
+NT relacoes monetarias
+NT economia monetaria
+NT instituicoes financeiras e credito
+NT livre circulacao de capitais
+NT financiamento e investimento
+NT seguros
+NT financas publicas e politica orcamental
+NT orcamento
+NT fiscalidade
+NT precos
+
+questoes sociais  
+BT indice
+NT familia
+NT migracoes
+NT demografia e populacao
+NT quadro social
+NT vida social
+NT cultura e religiao
+NT proteccao social
+NT saude
+NT urbanismo e construcao civil
+
+educacao comunicacao  
+BT indice
+NT educacao
+NT ensino
+NT organizacao do ensino
+NT documentacao
+NT comunicacao
+NT informacao e tratamento da informacao
+NT informatica e processamento de dados ciencias  
+BT indice
+NT ciencias naturais e aplicadas
+NT ciencias humanas
+
+empresas concorrencia  
+BT indice
+NT organizacao de empresas
+NT tipos de empresa
+NT forma juridica de sociedade
+NT gestao administrativa
+NT gestao contabilistica
+NT concorrencia
+
+emprego trabalho  
+BT indice
+NT emprego
+NT mercado do trabalho
+NT condicoes e organizacao do trabalho
+NT administracao e remuneracao do pessoal
+NT relacoes laborais e direito do trabalho
+
+transportes  
+BT indice
+NT politica de transportes
+NT organizacao dos transportes
+NT transporte terrestre
+NT transporte maritimo e fluvial
+NT transporte aereo e espacial
+
+meio ambiente  
+BT indice
+NT politica ambiental
+NT meio natural
+NT degradacao do ambiente agricultura, silvicultura e pesca  
+
+agroalimentar  
+BT  indice
+NT produto vegetal
+NT produto animal
+NT produto agricola transformado
+NT bebidas e acucar
+NT produto alimentar
+NT tecnologia alimentar
+
+producao  
+BT indice
+NT producao
+NT tecnologia e regulamentacao tecnica
+NT investigacao e propriedade intelectual
+ 
+energia  
+BT indice
+NT politica energetica
+NT industrias carbonifera e mineira
+NT industria petrolifera
+NT industrias nuclear e electrica
+NT energia nao poluente
 
 
+arhus
+MT regioes dos paises da comunidade
+BT regioes da Dinamarca
+
+abacate
+USE fruto tropical
+
+venda abaixo
+USE venda com prejuizo 
+
+exploracao agricola
+MT producao e estruturas agricolas
+UF cessacao de actividade agricola
+UF indemnizacao vitalicia de partida
+BT politica das estruturas agricolas
+RT cessacao de actividade
+
+abandono escolar
+MT educacao
+UF abandono da escolaridade
+UF abandono dos estudos
+UF interrupcao dos estudos
+BT duracao dos estudos
+
+abastecimento
+MT trocas comerciais
+NT auto abastecimento
+NT balanco de abastecimento
+NT penuria
+NT seguranca de abastecimento
+RT aprovisionamento energetico
+RT fornecedor
+
+abastecimento agua
+MT urbanismo e construcao civil
+UF aprovisionamento de agua
+UF conducao de agua
+BT infra estrutura urbana
+RT ordenamento hidrico
+RT recursos hidricos
 
 
